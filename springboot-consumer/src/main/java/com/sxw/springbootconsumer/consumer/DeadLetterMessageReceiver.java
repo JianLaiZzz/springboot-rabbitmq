@@ -13,15 +13,13 @@ import com.rabbitmq.client.Channel;
  * @date 2020/12/20 21:48
  **/
 @Component
-public class DeadLetterMessageReceiver
-{
-//	@RabbitListener(bindings = {
-//			@QueueBinding(value = @Queue(value = "orderDead-queue", durable = "true"), exchange = @Exchange(name = "orderDead-exchange", durable = "true", type = "direct"), key = "dead") })
+public class DeadLetterMessageReceiver {
+    //	@RabbitListener(bindings = {
+//			@QueueBinding(value = @Queue(vale = "orderDead-queue", durable = "true"), exchange = @Exchange(name = "orderDead-exchange", durable = "true", type = "direct"), key = "dead") })
 //	@RabbitHandler
-	@RabbitListener(queues = "orderDead-queue")
-	public void receiveA(Message message, Channel channel) throws IOException
-	{
-		System.out.println("收到死信消息A：" + new String(message.getBody()));
-		channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-	}
+    @RabbitListener(queues = "orderDead-queue")
+    public void receiveA(Message message, Channel channel) throws IOException {
+        System.out.println("收到死信消息A：" + new String(message.getBody()));
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+    }
 }
