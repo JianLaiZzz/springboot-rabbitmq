@@ -1,16 +1,15 @@
 package com.sxw.springbootconsumer.consumer;
 
-import java.io.IOException;
-import java.util.Map;
-
+import com.rabbitmq.client.Channel;
+import com.sxw.entity.Order;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import com.rabbitmq.client.Channel;
-import com.sxw.entity.Order;
+import java.io.IOException;
+import java.util.Map;
 
 @Component
 public class OrderReceiver {
@@ -20,7 +19,6 @@ public class OrderReceiver {
             @QueueBinding(value = @Queue(value = "order-queue", durable = "true", arguments = {
                     @Argument(name = "x-dead-letter-exchange", value = "orderDead-exchange"),
                     @Argument(name = "x-dead-letter-routing-key", value = "dead")}), exchange = @Exchange(name = "order-exchange", durable = "true", type = "topic"), key = "order.*")})
-
     @RabbitHandler //如果有消息过来，在消费的时候调用这个方法
     public void onOrderMessage(@Payload Order order, @Headers Map<String, Object> headers,
                                Channel channel) throws IOException {
@@ -41,9 +39,14 @@ public class OrderReceiver {
          */
         boolean multiple = false;
 
-        channel.basicNack(deliveryTag, false, false);
+
+        // channel.basicNack(deliveryTag, false, false);
+
 
         //ACK,确认一条消息已经被消费
         //channel.basicAck(deliveryTag, multiple);
+
+        System.out.println("order-queue" + channel.toString());
+        System.out.println("order-queue" + channel.getDefaultConsumer().toString());
     }
 }

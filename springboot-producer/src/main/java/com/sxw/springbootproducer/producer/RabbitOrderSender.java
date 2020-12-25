@@ -5,6 +5,7 @@ import com.rabbitmq.client.ReturnCallback;
 import com.sxw.entity.Order;
 import com.sxw.springbootproducer.constant.Constants;
 import com.sxw.springbootproducer.mapper.BrokerMessageLogMapper;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.support.CorrelationData;
@@ -40,9 +41,10 @@ public class RabbitOrderSender {
     };
 
 
-    ReturnCallback returnCallback = new ReturnCallback() {
+    final RabbitTemplate.ReturnCallback returnCallback = new RabbitTemplate.ReturnCallback() {
+
         @Override
-        public void handle(Return returnMessage) {
+        public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
 
         }
     };
@@ -59,15 +61,23 @@ public class RabbitOrderSender {
          * 当mandatory设置为false时，出现上述情况broker会直接将消息丢弃
          */
         rabbitTemplate.setMandatory(true);
+
+        rabbitTemplate.setReturnCallback(returnCallback);
         // 通过实现 ConfirmCallback 接口，消息发送到 Broker 后触发回调，确认消息是否到达 Broker 服务器，也就是只确认是否正确到达 Exchange 中
         rabbitTemplate.setConfirmCallback(confirmCallback);
         //消息唯一ID
         CorrelationData correlationData = new CorrelationData(order.getMessageId());
-        rabbitTemplate.convertAndSend("order-exchange", "order.ABC", order, message -> {
-            MessageProperties messageProperties = message.getMessageProperties();
-            // 设置这条消息的过期时间
-            messageProperties.setExpiration("5000");
-            return message;
-        }, correlationData);
+//        //消息延时
+//        rabbitTemplate.convertAndSend("order-exchange", "order.ABC", order, message -> {
+//            MessageProperties messageProperties = message.getMessageProperties();
+//            // 设置这条消息的过期时间
+//            messageProperties.setExpiration("5000");
+//            return message;
+//        }, correlationData);
+
+
+        rabbitTemplate.convertAndSend("order-exchange", "order.ABC", order, correlationData);
+
+
     }
 }
